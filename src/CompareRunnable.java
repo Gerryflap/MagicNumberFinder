@@ -13,28 +13,31 @@ public class CompareRunnable implements Runnable {
 
     @Override
     public void run() {
+        Job job = null;
         Map<Integer, BigNumber> part;
         boolean equal;
         while(true) {
             synchronized (master.getQueue()) {
                 if (master.getQueue().size() != 0) {
-                    part = master.getQueue().get(0);
+                    job = master.getQueue().get(0);
                     master.getQueue().remove(0);
                 } else {
                     part = null;
                 }
             }
-                if (part!=null){
+                if (job != null){
+                    part = job.getBinMap();
+                    //System.out.println("Starting with: "+part );
                     equal = true;
                     for (Integer base : part.keySet()) {
-                        equal = equal && (part.get(base).compare(part.get(2)) == 0);
+                        equal = equal && (part.get(base).compare(part.get(NumberFinder.STARTING_BASE)) == 0);
                         if (!equal) {
                             break;
                         }
                     }
 
                     if (equal) {
-                        master.found(part.size() + 1, part.get(2));
+                        master.found(part.size() + NumberFinder.STARTING_BASE - 1, job);
                     }
 
 
